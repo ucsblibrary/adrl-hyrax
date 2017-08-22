@@ -741,6 +741,7 @@ DEPENDENCIES
   fcrepo_wrapper
   hydra-role-management
   hyrax!
+  jbuilder
   jquery-rails
   pg (~> 0.18)
   puma
