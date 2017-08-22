@@ -9,6 +9,7 @@ brew install redis sqlite fits imagemagick ffmpeg
 bundle install
 bin/rake db:setup
 bin/wrap
+bin/rails hyrax:default_admin_set:create
 bin/rails s
 ```
 
