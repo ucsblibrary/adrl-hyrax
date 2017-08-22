@@ -1,0 +1,8 @@
+de:
+  hyrax:
+    icons:
+      text:     'fa fa-file-text-o'
+    select_type:
+      text:
+        name:               "Text"
+        description:        "Text Werke"
