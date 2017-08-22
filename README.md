@@ -1,24 +1,24 @@
-# README
+# [Geniza](https://en.wikipedia.org/wiki/Cairo_Geniza)
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Development
 
-Things you may want to cover:
+See <https://github.com/samvera/hyrax#prerequisites>
 
-* Ruby version
+```shell
+brew install redis sqlite fits imagemagick ffmpeg
+bundle install
+bin/rake db:setup
+bin/wrap
+bin/rails s
+```
 
-* System dependencies
+### creating the initial admin user
 
-* Configuration
+<https://github.com/samvera/hyrax/wiki/Making-Admin-Users-in-Hyrax#add-an-initial-admin-user-via-command-line>
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+In the Rails console:
+```
+admin = Role.create(name: "admin")
+admin.users << User.find_by_user_key( "your_admin_users_email@fake.email.org" )
+admin.save
+```
