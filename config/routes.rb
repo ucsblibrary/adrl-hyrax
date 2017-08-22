@@ -1,25 +1,31 @@
 Rails.application.routes.draw do
-  
+  mount Hydra::RoleManagement::Engine => '/'
+  mount Qa::Engine => '/authorities'
+  mount Hyrax::Engine, at: '/'
   mount Blacklight::Engine => '/'
-  
-    concern :searchable, Blacklight::Routes::Searchable.new
 
-  resource :catalog, only: [:index], as: 'catalog', path: '/catalog', controller: 'catalog' do
+  root 'hyrax/homepage#index'
+
+  devise_for :users
+  curation_concerns_basic_routes
+
+  concern :searchable, Blacklight::Routes::Searchable.new
+  concern :exportable, Blacklight::Routes::Exportable.new
+
+  resources :welcome, only: 'index'
+
+  resource :catalog,
+           only: [:index],
+           as: 'catalog',
+           path: '/catalog',
+           controller: 'catalog' do
     concerns :searchable
   end
 
-  devise_for :users
-  mount Hydra::RoleManagement::Engine => '/'
-
-  mount Qa::Engine => '/authorities'
-  mount Hyrax::Engine, at: '/'
-  resources :welcome, only: 'index'
-  root 'hyrax/homepage#index'
-  curation_concerns_basic_routes
-  curation_concerns_embargo_management
-  concern :exportable, Blacklight::Routes::Exportable.new
-
-  resources :solr_documents, only: [:show], path: '/catalog', controller: 'catalog' do
+  resources :solr_documents,
+            only: [:show],
+            path: '/catalog',
+            controller: 'catalog' do
     concerns :exportable
   end
 
@@ -30,6 +36,4 @@ Rails.application.routes.draw do
       delete 'clear'
     end
   end
-
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
