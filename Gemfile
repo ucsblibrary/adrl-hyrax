@@ -12,7 +12,6 @@ gem 'puma'
 gem 'redis'
 gem 'rsolr'
 gem 'sass-rails'
-gem 'turbolinks'
 gem 'uglifier'
 
 group :production do

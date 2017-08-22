@@ -705,9 +705,6 @@ GEM
     tilt (2.0.8)
     tinymce-rails (4.6.5)
       railties (>= 3.1.1)
-    turbolinks (5.0.1)
-      turbolinks-source (~> 5)
-    turbolinks-source (5.0.3)
     twitter-typeahead-rails (0.11.1.pre.corejavascript)
       actionpack (>= 3.1)
       jquery-rails
@@ -756,7 +753,6 @@ DEPENDENCIES
   solr_wrapper
   spring
   sqlite3
-  turbolinks
   uglifier
   web-console
 
