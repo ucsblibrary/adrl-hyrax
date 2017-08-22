@@ -43,13 +43,13 @@ es:
           subject_tesim: Tema
           title_tesim: Título
   hyrax:
-    product_name:           "Hyrax"
-    product_twitter_handle: "@HydraSphere"
-    institution_name:       "institución"
+    product_name:           "Geniza"
+    product_twitter_handle: ""
+    institution_name:       "UCSB"
     institution_name_full:  "El nombre de la institución"
     account_name:           "Mi identificador de cuenta institucional"
     directory:
-      suffix:               "@example.org"
+      suffix:               "@ucsb.edu"
     footer:
-      copyright_html: "<strong>Copyright &copy; 2017 Proyecto Hydra</strong> bajo licencia de Apache, Version 2.0"
-      service_html: Un servicio de <a href="http://projecthydra.org/" class="navbar-link" target="_blank">Proyecto Hydra</a>.
+      copyright_html: "<strong>Copyright &copy; 2017 UC Regents</strong>"
+      service_html: Un servicio de <a href="http://samvera.org/" class="navbar-link" target="_blank">Proyecto Samvera</a>.
