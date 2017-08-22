@@ -67,6 +67,8 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.5.1)
       public_suffix (~> 2.0, >= 2.0.2)
+    airbrussh (1.3.0)
+      sshkit (>= 1.6.1, != 1.7.0)
     almond-rails (0.1.0)
       rails (>= 4.2, < 6)
     arel (8.0.0)
@@ -74,13 +76,13 @@ GEM
       execjs
     awesome_nested_set (3.1.3)
       activerecord (>= 4.0.0, < 5.2)
-    aws-sdk (2.10.30)
-      aws-sdk-resources (= 2.10.30)
-    aws-sdk-core (2.10.30)
+    aws-sdk (2.10.31)
+      aws-sdk-resources (= 2.10.31)
+    aws-sdk-core (2.10.31)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.10.30)
-      aws-sdk-core (= 2.10.30)
+    aws-sdk-resources (2.10.31)
+      aws-sdk-core (= 2.10.31)
     aws-sigv4 (1.0.1)
     babel-source (5.8.35)
     babel-transpiler (0.7.0)
@@ -112,6 +114,7 @@ GEM
     bootstrap-sass (3.3.7)
       autoprefixer-rails (>= 5.2.1)
       sass (>= 3.3.4)
+    bootstrap_form (2.7.0)
     breadcrumbs_on_rails (3.0.1)
     browse-everything (0.14.0)
       addressable (~> 2.5)
@@ -130,6 +133,17 @@ GEM
     builder (3.2.3)
     byebug (9.1.0)
     cancancan (1.17.0)
+    capistrano (3.9.0)
+      airbrussh (>= 1.0.0)
+      i18n
+      rake (>= 10.0.0)
+      sshkit (>= 1.9.0)
+    capistrano-bundler (1.2.0)
+      capistrano (~> 3.1)
+      sshkit (~> 1.2)
+    capistrano-rails (1.3.0)
+      capistrano (~> 3.1)
+      capistrano-bundler (~> 1.1)
     capybara (2.15.1)
       addressable
       mini_mime (>= 0.1.3)
@@ -163,8 +177,6 @@ GEM
       railties (>= 4.1.0, < 5.2)
       responders
       warden (~> 1.2.3)
-    devise-guests (0.6.0)
-      devise
     diff-lcs (1.3)
     dropbox-sdk (1.6.5)
       json
@@ -291,13 +303,17 @@ GEM
     hydra-pcdm (0.9.0)
       active-fedora (>= 10, < 12)
       mime-types (>= 1)
+    hydra-role-management (0.2.2)
+      blacklight
+      bootstrap_form
+      cancancan
     hydra-works (0.16.0)
       hydra-derivatives (~> 3.0)
       hydra-file_characterization (~> 0.3, >= 0.3.3)
       hydra-pcdm (>= 0.9)
       om (~> 3.1)
-    hyrax (1.0.3)
-      active-fedora (>= 11.3.1)
+    hyrax (1.0.4)
+      active-fedora (~> 11.3, >= 11.3.1)
       active_attr (~> 0.9)
       active_fedora-noid (~> 2.0, >= 2.0.2)
       almond-rails (~> 0.1)
@@ -305,7 +321,7 @@ GEM
       blacklight (~> 6.9)
       blacklight-gallery (~> 0.7)
       breadcrumbs_on_rails (~> 3.0)
-      browse-everything (>= 0.10.5)
+      browse-everything (~> 0.10, >= 0.10.5)
       carrierwave (~> 1.0)
       clipboard-rails (~> 1.5)
       dry-equalizer (~> 0.2)
@@ -316,9 +332,9 @@ GEM
       font-awesome-rails (~> 4.2)
       hydra-derivatives (~> 3.3)
       hydra-editor (~> 3.2)
-      hydra-head (>= 10.4.0)
+      hydra-head (~> 10.4, >= 10.4.0)
       hydra-works (~> 0.16)
-      jquery-datatables-rails (~> 3.4.0)
+      jquery-datatables-rails (~> 3.4, >= 3.4.0)
       jquery-ui-rails (~> 5.0)
       json-schema
       kaminari_route_prefix (~> 0.1.1)
@@ -334,10 +350,10 @@ GEM
       rails_autolink (~> 1.1)
       railties (~> 5.0)
       rdf-rdfxml
-      redis-namespace (~> 1.5.2)
+      redis-namespace (~> 1.5, >= 1.5.2)
       redlock (~> 0.1.2)
       retriable (>= 2.9, < 4.0)
-      select2-rails (~> 3.5.9)
+      select2-rails (~> 3.5, >= 3.5.9)
       signet
       tinymce-rails (~> 4.1)
       tinymce-rails-imageupload (~> 4.0.17.beta)
@@ -422,10 +438,6 @@ GEM
       rdf-xsd (~> 2.1)
       sparql (~> 2.1)
       sparql-client (~> 2.1)
-    listen (3.1.5)
-      rb-fsevent (~> 0.9, >= 0.9.4)
-      rb-inotify (~> 0.9, >= 0.9.7)
-      ruby_dep (~> 1.2)
     little-plugger (1.1.4)
     logging (2.2.2)
       little-plugger (~> 1.1)
@@ -453,6 +465,9 @@ GEM
     nest (2.1.0)
       redic
     net-http-persistent (2.9.4)
+    net-scp (1.2.1)
+      net-ssh (>= 2.6.5)
+    net-ssh (4.1.0)
     nio4r (2.1.0)
     noid (0.9.0)
     nokogiri (1.8.0)
@@ -473,6 +488,7 @@ GEM
       rails (> 3.2.0)
     orm_adapter (0.5.0)
     os (0.9.6)
+    pg (0.21.0)
     posix-spawn (0.3.13)
     power_converter (0.1.2)
     public_suffix (2.0.5)
@@ -610,7 +626,6 @@ GEM
       multipart-post
       oauth2
     ruby-progressbar (1.8.1)
-    ruby_dep (1.5.0)
     rubyzip (1.2.1)
     sass (3.5.1)
       sass-listen (~> 4.0.0)
@@ -666,9 +681,6 @@ GEM
       rdf (~> 2.0)
     spring (2.0.2)
       activesupport (>= 4.2)
-    spring-watcher-listen (2.0.1)
-      listen (>= 2.7, < 4.0)
-      spring (>= 1.2, < 3.0)
     sprockets (3.7.1)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -681,6 +693,9 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     sqlite3 (1.3.13)
+    sshkit (1.14.0)
+      net-scp (>= 1.1.2)
+      net-ssh (>= 2.8.0)
     stomp (1.4.4)
     sxp (1.0.0)
       rdf (~> 2.0)
@@ -723,30 +738,30 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bcrypt
   byebug
-  capybara (~> 2.13)
-  coffee-rails (~> 4.2)
+  capistrano-rails
+  capybara
+  coffee-rails
   devise
-  devise-guests (~> 0.6)
   fcrepo_wrapper
+  hydra-role-management
   hyrax
-  jbuilder (~> 2.5)
   jquery-rails
-  listen (>= 3.0.5, < 3.2)
-  puma (~> 3.7)
+  pg (~> 0.18)
+  puma
   rails (~> 5.1.3)
-  rsolr (>= 1.0)
+  redis
+  rsolr
   rspec-rails
-  sass-rails (~> 5.0)
+  sass-rails
   selenium-webdriver
-  solr_wrapper (>= 0.3)
+  solr_wrapper
   spring
-  spring-watcher-listen (~> 2.0.0)
   sqlite3
-  turbolinks (~> 5)
-  tzinfo-data
-  uglifier (>= 1.3.0)
-  web-console (>= 3.3.0)
+  turbolinks
+  uglifier
+  web-console
 
 BUNDLED WITH
-   1.15.3
+   1.15.4
