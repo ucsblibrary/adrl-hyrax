@@ -1,6 +1,6 @@
 enable_jms: false
-fcrepo_home_dir: tmp/fedora/test
+fcrepo_home_dir: tmp/fedora/dev
 managed: true
-port: 8986
+port: 8984
 verbose: true
 version: 4.7.4
