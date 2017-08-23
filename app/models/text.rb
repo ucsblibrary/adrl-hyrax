@@ -1,5 +1,3 @@
-# Generated via
-#  `rails generate hyrax:work Text`
 class Text < ActiveFedora::Base
   include ::Hyrax::WorkBehavior
 

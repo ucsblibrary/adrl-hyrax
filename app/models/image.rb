@@ -1,5 +1,3 @@
-# Generated via
-#  `rails generate hyrax:work Image`
 class Image < ActiveFedora::Base
   include ::Hyrax::WorkBehavior
 
