@@ -1,12 +1,12 @@
 Rails.application.routes.draw do
+  devise_for :users
+
+  mount Blacklight::Engine => '/'
+  mount Hyrax::Engine, at: '/'
   mount Hydra::RoleManagement::Engine => '/'
   mount Qa::Engine => '/authorities'
-  mount Hyrax::Engine, at: '/'
-  mount Blacklight::Engine => '/'
 
   root 'hyrax/homepage#index'
-
-  devise_for :users
   curation_concerns_basic_routes
 
   concern :searchable, Blacklight::Routes::Searchable.new
