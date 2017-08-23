@@ -43,13 +43,14 @@ en:
           subject_tesim: Subject
           title_tesim: Title
   hyrax:
-    product_name:           "Geniza"
-    product_twitter_handle: ""
+    account_name:           ""
+    background_attribution_html: "Background image: <a href=\"https://alexandria.ucsb.edu/lib/ark:/48907/f3kw5fvh\" class=\"navbar-link\">Strongylocentrotus purpuratus</a> from the <a href=\"https://alexandria.ucsb.edu/lib/ark:/48907/f3f76c59\" class=\"navbar-link\">Ronald H. McPeak</a> collection."
     institution_name:       "UCSB"
     institution_name_full:  "University of California, Santa Barbara"
-    account_name:           ""
+    product_name:           "Geniza"
+    product_twitter_handle: ""
     directory:
       suffix:               "@ucsb.edu"
     footer:
       copyright_html: "<strong>Copyright &copy; 2017 UC Regents</strong>"
-      service_html: A service of <a href="http://samvera.org/" class="navbar-link" target="_blank">Project Samvera</a>.
+      service_html: Built on <a href="http://samvera.org/" class="navbar-link">Samvera</a>.

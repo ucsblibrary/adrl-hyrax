@@ -95,7 +95,8 @@ Hyrax.config do |config|
   # The default is true.
   # config.work_requires_files = true
 
-  # Should a button with "Share my work" show on the front page to all users (even those not logged in)?
+  # Should a button with "Share my work" show on the front page to all
+  # users (even those not logged in)?
   # config.always_display_share_button = true
 
   # The user who runs batch jobs. Update this if you aren't using emails
@@ -105,7 +106,7 @@ Hyrax.config do |config|
   # config.audit_user_key = 'audituser@example.com'
   #
   # The banner image. Should be 5000px wide by 1000px tall
-  # config.banner_image = 'https://cloud.githubusercontent.com/assets/92044/18370978/88ecac20-75f6-11e6-8399-6536640ef695.jpg'
+  config.banner_image = '/assets/purple.jpg'
 
   # Temporary paths to hold uploads before they are ingested into FCrepo
   # These must be lambdas that return a Pathname. Can be configured separately
