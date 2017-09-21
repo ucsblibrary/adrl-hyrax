@@ -1,0 +1,8 @@
+pt-BR:
+  hyrax:
+    icons:
+      audio_recording:     'fa fa-file-text-o'
+    select_type:
+      audio_recording:
+        name:               "Audio Recording"
+        description:        "Audio recording trabalhos"

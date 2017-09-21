@@ -1,31 +1,33 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
   devise_for :users
 
-  mount Blacklight::Engine => '/'
-  mount Hyrax::Engine, at: '/'
-  mount Hydra::RoleManagement::Engine => '/'
-  mount Qa::Engine => '/authorities'
+  mount Blacklight::Engine => "/"
+  mount Hyrax::Engine, at: "/"
+  mount Hydra::RoleManagement::Engine => "/"
+  mount Qa::Engine => "/authorities"
 
-  root 'hyrax/homepage#index'
+  root "hyrax/homepage#index"
   curation_concerns_basic_routes
 
   concern :searchable, Blacklight::Routes::Searchable.new
   concern :exportable, Blacklight::Routes::Exportable.new
 
-  resources :welcome, only: 'index'
+  resources :welcome, only: "index"
 
   resource :catalog,
            only: [:index],
-           as: 'catalog',
-           path: '/catalog',
-           controller: 'catalog' do
+           as: "catalog",
+           path: "/catalog",
+           controller: "catalog" do
     concerns :searchable
   end
 
   resources :solr_documents,
             only: [:show],
-            path: '/catalog',
-            controller: 'catalog' do
+            path: "/catalog",
+            controller: "catalog" do
     concerns :exportable
   end
 
@@ -33,7 +35,7 @@ Rails.application.routes.draw do
     concerns :exportable
 
     collection do
-      delete 'clear'
+      delete "clear"
     end
   end
 end

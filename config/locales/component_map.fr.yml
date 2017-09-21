@@ -1,0 +1,8 @@
+fr:
+  hyrax:
+    icons:
+      component_map:     'fa fa-file-text-o'
+    select_type:
+      component_map:
+        name:               "Component Map"
+        description:        "Component map œuvres"

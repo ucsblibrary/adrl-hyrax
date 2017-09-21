@@ -1,0 +1,8 @@
+fr:
+  hyrax:
+    icons:
+      index_map:     'fa fa-file-text-o'
+    select_type:
+      index_map:
+        name:               "Index Map"
+        description:        "Index map œuvres"

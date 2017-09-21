@@ -1,0 +1,10 @@
+zh:
+  hyrax:
+    icons:
+      component_map:     'fa fa-file-text-o'
+    select_type:
+      component_map:
+        # TODO: translate `human_name` into Chinese
+        name:               "Component Map"
+        # TODO: translate `human_name` into Chinese
+        description:        "Component map 作品"

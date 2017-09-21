@@ -1,0 +1,10 @@
+es:
+  hyrax:
+    icons:
+      component_map:     'fa fa-file-text-o'
+    select_type:
+      component_map:
+        # TODO: translate `human_name` into Spanish
+        name:               "Component Map"
+        # TODO: translate `human_name` into Spanish
+        description:        "Component map trabajos"

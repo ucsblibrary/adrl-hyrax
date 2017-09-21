@@ -1,0 +1,10 @@
+es:
+  hyrax:
+    icons:
+      index_map:     'fa fa-file-text-o'
+    select_type:
+      index_map:
+        # TODO: translate `human_name` into Spanish
+        name:               "Index Map"
+        # TODO: translate `human_name` into Spanish
+        description:        "Index map trabajos"

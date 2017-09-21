@@ -1,0 +1,8 @@
+pt-BR:
+  hyrax:
+    icons:
+      map_set:     'fa fa-file-text-o'
+    select_type:
+      map_set:
+        name:               "Map Set"
+        description:        "Map set trabalhos"

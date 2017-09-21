@@ -1,6 +1,13 @@
+# frozen_string_literal: true
+
 Hyrax.config do |config|
-  config.register_curation_concern :text
   config.register_curation_concern :image
+  config.register_curation_concern :ETD
+  config.register_curation_concern :audio_recording
+  config.register_curation_concern :map_set
+  config.register_curation_concern :component_map
+  config.register_curation_concern :index_map
+  config.register_curation_concern :scanned_map
 
   # Register roles that are expected by your implementation.
   # @see Hyrax::RoleRegistry for additional details.
@@ -106,7 +113,7 @@ Hyrax.config do |config|
   # config.audit_user_key = 'audituser@example.com'
   #
   # The banner image. Should be 5000px wide by 1000px tall
-  config.banner_image = '/assets/fart.png'
+  config.banner_image = "/assets/fart.png"
 
   # Temporary paths to hold uploads before they are ingested into FCrepo
   # These must be lambdas that return a Pathname. Can be configured separately
@@ -194,6 +201,6 @@ end
 
 Date::DATE_FORMATS[:standard] = "%m/%d/%Y"
 
-Qa::Authorities::Local.register_subauthority('subjects', 'Qa::Authorities::Local::TableBasedAuthority')
-Qa::Authorities::Local.register_subauthority('languages', 'Qa::Authorities::Local::TableBasedAuthority')
-Qa::Authorities::Local.register_subauthority('genres', 'Qa::Authorities::Local::TableBasedAuthority')
+Qa::Authorities::Local.register_subauthority("subjects", "Qa::Authorities::Local::TableBasedAuthority")
+Qa::Authorities::Local.register_subauthority("languages", "Qa::Authorities::Local::TableBasedAuthority")
+Qa::Authorities::Local.register_subauthority("genres", "Qa::Authorities::Local::TableBasedAuthority")

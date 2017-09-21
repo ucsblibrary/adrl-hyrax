@@ -1,0 +1,10 @@
+zh:
+  hyrax:
+    icons:
+      audio_recording:     'fa fa-file-text-o'
+    select_type:
+      audio_recording:
+        # TODO: translate `human_name` into Chinese
+        name:               "Audio Recording"
+        # TODO: translate `human_name` into Chinese
+        description:        "Audio recording 作品"
