@@ -9,7 +9,7 @@ gem "coffee-rails"
 gem "devise"
 gem "ezid-client"
 gem "hydra-role-management"
-gem "hyrax", git: "https://github.com/samvera/hyrax.git"
+gem "hyrax", git: "https://github.com/dunn/hyrax.git", branch: "controlled-vocab-namespace"
 gem "jbuilder"
 gem "jquery-rails"
 gem "linked_vocabs",
