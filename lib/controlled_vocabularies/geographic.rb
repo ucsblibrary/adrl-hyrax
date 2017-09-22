@@ -8,7 +8,7 @@ class ControlledVocabularies::Geographic < ActiveTriples::Resource
 
   configure repository: :vocabs
   configure rdf_label: RDF::URI("http://www.geonames.org/ontology#name")
-  use_vocabulary :geonames, class: ::Vocabularies::GEONAMES
+  use_vocabulary :geonames, class: RDF::Vocab::GEONAMES
   use_vocabulary :lcnames, class: ::Vocabularies::LCNAMES
   use_vocabulary :lcsh, class: ::Vocabularies::LCSH
 

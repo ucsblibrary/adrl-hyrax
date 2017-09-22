@@ -7,7 +7,6 @@ module Vocabularies
   autoload :CCPUBLIC
   autoload :EURIGHTS
   autoload :FEDORA
-  autoload :GEONAMES
   autoload :ISO_639_2
   autoload :LCCS
   autoload :LCNAMES
