@@ -31,6 +31,28 @@ Rails.application.routes.draw do
     concerns :exportable
   end
 
+  resources :local_authorities, only: :index
+
+  get "authorities/agents/:id",
+      to: "local_authorities#show",
+      as: "agent"
+
+  get "authorities/people/:id",
+      to: "local_authorities#show",
+      as: "person"
+
+  get "authorities/groups/:id",
+      to: "local_authorities#show",
+      as: "group"
+
+  get "authorities/organizations/:id",
+      to: "local_authorities#show",
+      as: "organization"
+
+  get "authorities/topics/:id",
+      to: "local_authorities#show",
+      as: "topic"
+
   resources :bookmarks do
     concerns :exportable
 

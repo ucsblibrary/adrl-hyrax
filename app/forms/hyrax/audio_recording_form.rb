@@ -5,6 +5,5 @@
 module Hyrax
   class AudioRecordingForm < Hyrax::Forms::WorkForm
     self.model_class = ::AudioRecording
-    self.terms += [:resource_type]
   end
 end

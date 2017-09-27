@@ -9,16 +9,18 @@ gem "coffee-rails"
 gem "devise"
 gem "ezid-client"
 gem "hydra-role-management"
-gem "hyrax", git: "https://github.com/dunn/hyrax.git", branch: "controlled-vocab-namespace"
+gem "hyrax", path: "/Users/alex/clones/hyrax"
 gem "jbuilder"
 gem "jquery-rails"
 gem "linked_vocabs",
-    git: "https://github.com/projecthydra-labs/linked_vocabs.git"
+    git: "https://github.com/projecthydra-labs/linked_vocabs.git",
+    ref: "67d80da0de07bf428c7f1a70ac2647b96edc274b"
 gem "marc"
 gem "metadata_ci",
     git: "https://github.com/ucsblibrary/metadata-ci.git",
     ref: "be592cdfc3d5a464d60f2cf3496409026e505d38"
 gem "puma"
+gem "rdf-vocab", ">= 2.2.7"
 gem "redis"
 gem "rsolr"
 gem "sass-rails"

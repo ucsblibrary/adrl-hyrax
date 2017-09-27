@@ -5,6 +5,5 @@
 module Hyrax
   class ComponentMapForm < Hyrax::Forms::WorkForm
     self.model_class = ::ComponentMap
-    self.terms += [:resource_type]
   end
 end

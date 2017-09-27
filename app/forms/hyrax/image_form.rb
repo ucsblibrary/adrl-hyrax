@@ -5,6 +5,5 @@
 module Hyrax
   class ImageForm < Hyrax::Forms::WorkForm
     self.model_class = ::Image
-    self.terms += [:resource_type]
   end
 end

@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 
 class CollectionIndexer < Hyrax::CollectionIndexer
-  include Hyrax::IndexesLinkedMetadata
-
+  self.thumbnail_field = ObjectIndexer.thumbnail_field
   def thumbnail_path
     ActionController::Base.helpers.image_path(
       "fontawesome/black/png/256/archive.png"
     )
   end
-  self.thumbnail_field = ObjectIndexer.thumbnail_field
+
+  def rdf_service
+    Hyrax::DeepIndexingService
+  end
 
   # Override behavior from Hydra::PCDM::CollectionIndexer.
   # When we index the members of this collection in the

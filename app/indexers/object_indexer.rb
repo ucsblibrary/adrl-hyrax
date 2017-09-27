@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class ObjectIndexer < Hyrax::WorkIndexer
-  include Hyrax::IndexesLinkedMetadata
-
   self.thumbnail_field = "thumbnail_url_ssm"
 
   ISSUED = Solrizer.solr_name("issued", :displayable)
@@ -25,6 +23,10 @@ class ObjectIndexer < Hyrax::WorkIndexer
 
   SORTABLE_CREATOR = Solrizer.solr_name("creator_label", :sortable)
   CREATOR_MULTIPLE = Solrizer.solr_name("creator_label", :stored_searchable)
+
+  def rdf_service
+    Hyrax::DeepIndexingService
+  end
 
   def generate_solr_document
     super do |solr_doc|
