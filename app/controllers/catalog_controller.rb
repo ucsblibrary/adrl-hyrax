@@ -49,7 +49,7 @@ class CatalogController < ApplicationController
                          if: :show_embargos_link?)
 
   configure_blacklight do |config|
-    config.search_builder_class = Hyrax::CatalogSearchBuilder
+    config.search_builder_class = SearchBuilder
     config.view.gallery.partials = [:index_header, :index]
     config.view.slideshow.partials = [:index]
     config.view.slideshow.slideshow_method = :choose_image

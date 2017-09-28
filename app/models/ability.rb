@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
 class Ability
-  # self.ability_logic += [:everyone_can_create_curation_concerns]
-
   # For fedora objects that have an admin policy assigned to
   # them, some of the rights that a user will be granted are
   # defined in the policy file: app/models/admin_policy.rb
   include Hydra::PolicyAwareAbility
-  include Hyrax::Ability
 
   attr_reader :on_campus
 
@@ -34,6 +31,7 @@ class Ability
   def admin?
     false
   end
+  alias can_create_any_work? admin?
 
   def metadata_admin_permissions
     return unless user_groups.include?(AdminPolicy::META_ADMIN)
