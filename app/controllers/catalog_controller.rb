@@ -3,107 +3,318 @@
 class CatalogController < ApplicationController
   include Hydra::Catalog
   include Hydra::Controller::ControllerBehavior
+  include BlacklightRangeLimit::ControllerOverride
 
-  # This filter applies the hydra access controls
+  # enforce_show_permissions is from hydra-access-controls gem
   before_action :enforce_show_permissions, only: :show
 
-  def self.uploaded_field
-    solr_name("system_create", :stored_sortable, type: :date)
+  def enforce_show_permissions(_opts = {})
+    permissions = current_ability.permissions_doc(params[:id])
+    return if can?(:discover, permissions)
+
+    raise Hydra::AccessDenied.new(
+      "You do not have sufficient access privileges to access this document.",
+      :discover, params[:id]
+    )
   end
 
-  def self.modified_field
-    solr_name("system_modified", :stored_sortable, type: :date)
+  rescue_from Blacklight::Exceptions::RecordNotFound do |e|
+    logger.error "(#{e.class}): #{e.inspect}"
+    @unknown_type = "Document"
+    @unknown_id = params[:id]
+    render "errors/not_found", status: 404
   end
+
+  rescue_from Blacklight::Exceptions::InvalidSolrID do |e|
+    logger.error e
+    @unknown_type = "Document"
+    @unknown_id = params[:id]
+    render "errors/not_found", status: 404
+  end
+
+  # Turn off SMS
+  # https://groups.google.com/d/msg/blacklight-development/l_zHRF_GQc8/_qUUbJSs__YJ
+  CatalogController.blacklight_config.show.document_actions.delete(:sms)
+
+  # TODO: re-implement this functionality
+  # https://github.library.ucsb.edu/ADRL/alexandria/pull/29
+  # https://help.library.ucsb.edu/browse/DIGREPO-504
+  CatalogController.blacklight_config.show.document_actions.delete(:email)
+  CatalogController.blacklight_config.show.document_actions.delete(:citation)
+
+  add_show_tools_partial(:edit, partial: "catalog/edit", if: :editor?)
+  add_show_tools_partial(:download, partial: "catalog/download")
+  add_show_tools_partial(:access,
+                         partial: "catalog/access",
+                         if: :show_embargos_link?)
 
   configure_blacklight do |config|
-    config.view.gallery.partials = [:index_header, :index]
-    config.view.masonry.partials = [:index]
-    config.view.slideshow.partials = [:index]
-
-    config.show.tile_source_field = :content_metadata_image_iiif_info_ssm
-    config.show.partials.insert(1, :openseadragon)
     config.search_builder_class = Hyrax::CatalogSearchBuilder
-
-    # Show gallery view
     config.view.gallery.partials = [:index_header, :index]
     config.view.slideshow.partials = [:index]
+    config.view.slideshow.slideshow_method = :choose_image
 
-    ## Default parameters to send to solr for all search-like requests. See also SolrHelper#solr_search_params
     config.default_solr_params = {
+      qf: %w[
+        accession_number_tesim
+        alternative_tesim
+        author_tesim
+        keywords_tesim
+        lc_subject_label_tesim
+        location_label_tesim
+        title_tesim
+      ].join(" "),
+      wt: "json",
       qt: "search",
       rows: 10,
-      qf: "title_tesim description_tesim creator_tesim keyword_tesim",
     }
 
-    # solr field configuration for document/show views
+    # solr field configuration for search results/index views
     config.index.title_field = solr_name("title", :stored_searchable)
-    config.index.display_type_field = solr_name("has_model", :symbol)
-    config.index.thumbnail_field = "thumbnail_path_ss"
+    config.index.display_type_field = "has_model_ssim"
+    config.index.thumbnail_field = ObjectIndexer.thumbnail_field
 
-    # solr fields that will be treated as facets by the blacklight application
-    #   The ordering of the field names is the order of the display
-    config.add_facet_field solr_name("human_readable_type", :facetable), label: "Type", limit: 5
-    config.add_facet_field solr_name("resource_type", :facetable), label: "Resource Type", limit: 5
-    config.add_facet_field solr_name("creator", :facetable), limit: 5
-    config.add_facet_field solr_name("contributor", :facetable), label: "Contributor", limit: 5
-    config.add_facet_field solr_name("keyword", :facetable), limit: 5
-    config.add_facet_field solr_name("subject", :facetable), limit: 5
-    config.add_facet_field solr_name("language", :facetable), limit: 5
-    config.add_facet_field solr_name("based_near", :facetable), limit: 5
-    config.add_facet_field solr_name("publisher", :facetable), limit: 5
-    config.add_facet_field solr_name("file_format", :facetable), limit: 5
-    config.add_facet_field solr_name("member_of_collections", :symbol), limit: 5, label: "Collections"
+    # This controls which partials are used, and in what order, for
+    # each record type.  E.g., for an AudioRecording we will render
+    #
+    # - _breadcrumbs_audio_recording.html.erb
+    # - _title_audio_recording.html.erb
+    # - _media_audio_recording.html.erb
+    # - _show_audio_recording.html.erb
+    #
+    # falling back to _title_default etc. in each case.
+    # config.show.partials = [:breadcrumbs, :title, :media, :show]
 
-    # The generic_type isn't displayed on the facet list
-    # It's used to give a label to the filter that comes from the user profile
-    config.add_facet_field solr_name("generic_type", :facetable), if: false
+    # Solr fields that will be treated as facets by the blacklight application
+    #
+    # The ordering of the field names is the order of the display.
+    #
+    # Setting a limit will trigger Blacklight's 'more' facet values link.
+    #
+    # * If left unset, then all facet values returned by solr will be
+    #   displayed (not always all results in Fedora; see
+    #   https://github.library.ucsb.edu/ADRL/alexandria/issues/13)
+    #
+    # * If set to an integer, then "f.somefield.facet.limit" will be added to
+    #   solr request, with actual solr request being +1 your configured limit --
+    #   you configure the number of items you actually want _tsimed_ in a page.
+    #
+    # * If set to 'true', then no additional parameters will be sent
+    #   to solr, but any 'sniffed' request limit parameters will be
+    #   used for paging, with paging at requested limit -1. Can sniff
+    #   from facet.limit or f.specific_field.facet.limit solr request
+    #   params. This 'true' config can be used if you set limits in
+    #   :default_solr_params, or as defaults on the solr side in the
+    #   request handler itself. Request handler defaults sniffing
+    #   requires solr requests to be made with "echoParams=all", for
+    #   app code to actually have it echo'd back to see it.
+    #
+    # :show may be set to false if you don't want the facet to be drawn in the
+    # facet bar
+    config.add_facet_field solr_name("work_type_label", :facetable),
+                           label: "Format", limit: true
+
+    config.add_facet_field solr_name("collection_label", :symbol),
+                           label: "Collection", limit: true
+
+    config.add_facet_field ObjectIndexer::ALL_CONTRIBUTORS_FACET,
+                           label: "Contributor", limit: true
+
+    config.add_facet_field solr_name("lc_subject_label", :facetable),
+                           label: "Topic", limit: 20
+
+    config.add_facet_field solr_name("location_label", :facetable),
+                           label: "Place", limit: true
+
+    config.add_facet_field solr_name("form_of_work_label", :facetable),
+                           label: "Genre", limit: true
+
+    config.add_facet_field ObjectIndexer::FACETABLE_YEAR,
+                           label: "Date", range: true
+
+    config.add_facet_field solr_name("language", :facetable),
+                           label: "Language", limit: true
+
+    config.add_facet_field solr_name("department", :facetable),
+                           label: "Academic Department", limit: true
+
+    config.add_facet_field solr_name("sub_location", :facetable),
+                           label: "Library Location", limit: true
+
+    config.add_facet_field solr_name("license_label", :facetable),
+                           label: "Rights", limit: true
 
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
     # handler defaults, or have no facets.
     config.add_facet_fields_to_solr_request!
+    # use this instead if you don't want to query facets marked :show=>false
+    # config.default_solr_params[:'facet.field'] =
+    #   config.facet_fields.select { |_k, v| v[:show] != false }.keys
 
-    # solr fields to be displayed in the index (search results) view
+    # Solr fields to be displayed in the index (search results) view
     #   The ordering of the field names is the order of the display
-    config.add_index_field solr_name("title", :stored_searchable), label: "Title", itemprop: "name", if: false
-    config.add_index_field solr_name("description", :stored_searchable), itemprop: "description", helper_method: :iconify_auto_link
-    config.add_index_field solr_name("keyword", :stored_searchable), itemprop: "keywords", link_to_search: solr_name("keyword", :facetable)
-    config.add_index_field solr_name("subject", :stored_searchable), itemprop: "about", link_to_search: solr_name("subject", :facetable)
-    config.add_index_field solr_name("creator", :stored_searchable), itemprop: "creator", link_to_search: solr_name("creator", :facetable)
-    config.add_index_field solr_name("contributor", :stored_searchable), itemprop: "contributor", link_to_search: solr_name("contributor", :facetable)
-    config.add_index_field solr_name("proxy_depositor", :symbol), label: "Depositor", helper_method: :link_to_profile
-    config.add_index_field solr_name("depositor"), label: "Owner", helper_method: :link_to_profile
-    config.add_index_field solr_name("publisher", :stored_searchable), itemprop: "publisher", link_to_search: solr_name("publisher", :facetable)
-    config.add_index_field solr_name("based_near", :stored_searchable), itemprop: "contentLocation", link_to_search: solr_name("based_near", :facetable)
-    config.add_index_field solr_name("language", :stored_searchable), itemprop: "inLanguage", link_to_search: solr_name("language", :facetable)
-    config.add_index_field solr_name("date_uploaded", :stored_sortable, type: :date), itemprop: "datePublished", helper_method: :human_readable_date
-    config.add_index_field solr_name("date_modified", :stored_sortable, type: :date), itemprop: "dateModified", helper_method: :human_readable_date
-    config.add_index_field solr_name("date_created", :stored_searchable), itemprop: "dateCreated"
-    config.add_index_field solr_name("rights", :stored_searchable), helper_method: :license_links
-    config.add_index_field solr_name("resource_type", :stored_searchable), label: "Resource Type", link_to_search: solr_name("resource_type", :facetable)
-    config.add_index_field solr_name("file_format", :stored_searchable), link_to_search: solr_name("file_format", :facetable)
-    config.add_index_field solr_name("identifier", :stored_searchable), helper_method: :index_field_link, field_name: "identifier"
-    config.add_index_field solr_name("embargo_release_date", :stored_sortable, type: :date), label: "Embargo release date", helper_method: :human_readable_date
-    config.add_index_field solr_name("lease_expiration_date", :stored_sortable, type: :date), label: "Lease expiration date", helper_method: :human_readable_date
+    config.add_index_field solr_name("work_type_label", :stored_searchable),
+                           label: "Format"
 
-    # solr fields to be displayed in the show (single result) view
+    config.add_index_field solr_name("collection_label", :symbol),
+                           label: "Collection"
+
+    config.add_index_field ObjectIndexer::ALL_CONTRIBUTORS_LABEL,
+                           label: "Contributors",
+                           if: :show_contributors?
+
+    config.add_index_field solr_name("author", :stored_searchable),
+                           label: "Author", if: :show_author?
+
+    config.add_index_field solr_name("created", :displayable),
+                           label: "Creation Date"
+
+    config.add_index_field solr_name("issued", :displayable),
+                           label: "Issued Date"
+
+    config.add_index_field solr_name("description", :stored_searchable),
+                           label: "Summary",
+                           if: :collection?
+
+    # Solr fields to be displayed in the show (item-level) view
     #   The ordering of the field names is the order of the display
-    config.add_show_field solr_name("title", :stored_searchable)
-    config.add_show_field solr_name("description", :stored_searchable)
-    config.add_show_field solr_name("keyword", :stored_searchable)
-    config.add_show_field solr_name("subject", :stored_searchable)
-    config.add_show_field solr_name("creator", :stored_searchable)
-    config.add_show_field solr_name("contributor", :stored_searchable)
-    config.add_show_field solr_name("publisher", :stored_searchable)
-    config.add_show_field solr_name("based_near", :stored_searchable)
-    config.add_show_field solr_name("language", :stored_searchable)
-    config.add_show_field solr_name("date_uploaded", :stored_searchable)
-    config.add_show_field solr_name("date_modified", :stored_searchable)
-    config.add_show_field solr_name("date_created", :stored_searchable)
-    config.add_show_field solr_name("rights", :stored_searchable)
-    config.add_show_field solr_name("resource_type", :stored_searchable), label: "Resource Type"
-    config.add_show_field solr_name("format", :stored_searchable)
-    config.add_show_field solr_name("identifier", :stored_searchable)
+    Metadata::RELATIONS.each_key do |key|
+      config.add_show_field solr_name("#{key}_label", :stored_searchable),
+                            label: key.to_s.titleize,
+                            link_to_search: "all_contributors_label_sim"
+    end
+
+    config.add_show_field solr_name("alternative", :stored_searchable),
+                          label: "Variant Title"
+
+    config.add_show_field solr_name("place_of_publication", :stored_searchable),
+                          label: "Place of Publication"
+
+    config.add_show_field solr_name("publisher", :stored_searchable),
+                          label: "Publisher"
+
+    config.add_show_field solr_name("created", :displayable),
+                          label: "Creation Date"
+
+    config.add_show_field solr_name("issued", :displayable),
+                          label: "Issued Date"
+
+    config.add_show_field solr_name("date_other", :displayable),
+                          label: "Other Date"
+
+    config.add_show_field solr_name("language", :stored_searchable),
+                          label: "Language"
+
+    config.add_show_field solr_name("lc_subject_label", :stored_searchable),
+                          label: "Topics",
+                          link_to_search: "lc_subject_label_sim"
+
+    config.add_show_field solr_name("marc_subjects", :stored_searchable),
+                          label: "Topics",
+                          link_to_search: "marc_subjects_sim"
+
+    config.add_show_field solr_name("location_label", :stored_searchable),
+                          label: "Places",
+                          link_to_search: "location_label_sim"
+
+    config.add_show_field(
+      solr_name("keywords", :stored_searchable),
+      label: "Keywords",
+      separator_options: {
+        words_connector: '<span class="invisible">,</span> <br />',
+        two_words_connector: '<span class="invisible">,</span> <br />',
+        last_word_connector: '<span class="invisible">, and</span> <br />',
+      }
+    )
+
+    config.add_show_field solr_name("form_of_work_label", :stored_searchable),
+                          label: "Genres",
+                          link_to_search: "form_of_work_label_sim"
+
+    config.add_show_field solr_name("degree_grantor", :symbol),
+                          label: "Degree Grantor"
+
+    config.add_show_field solr_name("dissertation", :displayable),
+                          label: "Dissertation"
+
+    config.add_show_field solr_name("note_label", :stored_searchable),
+                          label: "Notes",
+                          helper_method: "not_simple_format"
+
+    config.add_show_field solr_name("citation", :displayable), label: "Citation"
+
+    config.add_show_field solr_name("description", :stored_searchable),
+                          label: "Summary",
+                          helper_method: "not_simple_format"
+
+    config.add_show_field solr_name("extent", :displayable),
+                          label: "Physical Description"
+
+    config.add_show_field solr_name("scale", :stored_searchable), label: "Scale"
+
+    config.add_show_field solr_name("work_type_label", :stored_searchable),
+                          label: "Format",
+                          link_to_search: "work_type_label_sim"
+
+    config.add_show_field solr_name("collection_label", :symbol),
+                          label: "Collection(s)",
+                          link_to_search: "collection_label_ssim"
+
+    config.add_show_field solr_name("series_name", :displayable),
+                          label: "Series",
+                          link_to_search: "series_name_sim"
+
+    config.add_show_field solr_name("folder_name", :stored_searchable),
+                          label: "Folder",
+                          link_to_search: "folder_name_sim"
+
+    config.add_show_field solr_name("finding_aid", :stored_searchable),
+                          label: "Finding Aid"
+
+    config.add_show_field(
+      solr_name("sub_location", :displayable, type: :string),
+      label: "Library Location",
+      link_to_search: "sub_location_sim"
+    )
+
+    config.add_show_field solr_name("fulltext_link", :displayable),
+                          label: "Other Versions",
+                          helper_method: :display_link
+
+    config.add_show_field solr_name("identifier", :displayable),
+                          label: "ARK"
+
+    config.add_show_field solr_name("accession_number", :symbol),
+                          label: "Local Identifier"
+
+    config.add_show_field "isbn_ssim", label: "ISBN"
+
+    config.add_show_field solr_name("matrix_number", :stored_searchable),
+                          label: "Matrix Number"
+
+    config.add_show_field solr_name("issue_number", :stored_searchable),
+                          label: "Issue Number"
+
+    config.add_show_field solr_name("system_number", :symbol),
+                          label: "Catalog System Number"
+
+    config.add_show_field solr_name("copyright", :displayable),
+                          label: "Copyright"
+
+    config.add_show_field solr_name("license_label", :stored_searchable),
+                          label: "Rights",
+                          helper_method: "show_license_icons"
+
+    config.add_show_field solr_name("rights_holder_label", :stored_searchable),
+                          label: "Copyright Holder"
+
+    config.add_show_field solr_name("date_copyrighted", :displayable),
+                          label: "Copyright Date"
+
+    config.add_show_field solr_name("restrictions", :stored_searchable),
+                          label: "Restrictions",
+                          helper_method: "not_simple_format"
 
     # "fielded" search configuration. Used by pulldown among other places.
     # For supported keys in hash, see rdoc for Blacklight::SearchFields
@@ -134,133 +345,24 @@ class CatalogController < ApplicationController
     # Now we see how to over-ride Solr request handler defaults, in this
     # case for a BL "search field", which is really a dismax aggregate
     # of Solr search fields.
-    # creator, title, description, publisher, date_created,
-    # subject, language, resource_type, format, identifier, based_near,
-    config.add_search_field("contributor") do |field|
-      # solr_parameters hash are sent to Solr as ordinary url query params.
-
-      # :solr_local_parameters will be sent using Solr LocalParams
-      # syntax, as eg {! qf=$title_qf }. This is neccesary to use
-      # Solr parameter de-referencing like $title_qf.
-      # See: http://wiki.apache.org/solr/LocalParams
-      solr_name = solr_name("contributor", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("creator") do |field|
-      solr_name = solr_name("creator", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
     config.add_search_field("title") do |field|
-      solr_name = solr_name("title", :stored_searchable)
       field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("description") do |field|
-      field.label = "Abstract or Summary"
-      solr_name = solr_name("description", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("publisher") do |field|
-      solr_name = solr_name("publisher", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("date_created") do |field|
-      solr_name = solr_name("created", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
+        qf: "title_tesim",
+        pf: "title_tesim",
       }
     end
 
     config.add_search_field("subject") do |field|
-      solr_name = solr_name("subject", :stored_searchable)
       field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
+        qf: "lc_subject_label_tesim",
+        pf: "lc_subject_label_tesim",
       }
     end
 
-    config.add_search_field("language") do |field|
-      solr_name = solr_name("language", :stored_searchable)
+    config.add_search_field("accession_number") do |field|
       field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("resource_type") do |field|
-      solr_name = solr_name("resource_type", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("format") do |field|
-      solr_name = solr_name("format", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("identifier") do |field|
-      solr_name = solr_name("id", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("based_near") do |field|
-      field.label = "Location"
-      solr_name = solr_name("based_near", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("keyword") do |field|
-      solr_name = solr_name("keyword", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("depositor") do |field|
-      solr_name = solr_name("depositor", :symbol)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
-      }
-    end
-
-    config.add_search_field("rights") do |field|
-      solr_name = solr_name("rights", :stored_searchable)
-      field.solr_local_parameters = {
-        qf: solr_name,
-        pf: solr_name,
+        qf: "accession_number_tesim",
+        pf: "accession_number_tesim",
       }
     end
 
@@ -268,22 +370,48 @@ class CatalogController < ApplicationController
     # label in pulldown is followed by the name of the SOLR field to sort by and
     # whether the sort is ascending or descending (it must be asc or desc
     # except in the relevancy case).
-    # label is key, solr field is value
-    config.add_sort_field "score desc, #{uploaded_field} desc", label: "relevance"
-    config.add_sort_field "#{uploaded_field} desc", label: "date uploaded \u25BC"
-    config.add_sort_field "#{uploaded_field} asc", label: "date uploaded \u25B2"
-    config.add_sort_field "#{modified_field} desc", label: "date modified \u25BC"
-    config.add_sort_field "#{modified_field} asc", label: "date modified \u25B2"
+    config.add_sort_field(
+      "score desc, #{ObjectIndexer::SORTABLE_DATE} desc, creator_label_si asc",
+      label: "relevance"
+    )
+    config.add_sort_field(
+      "#{ObjectIndexer::SORTABLE_DATE} asc, creator_label_si asc",
+      label: "year ascending"
+    )
+    config.add_sort_field(
+      "#{ObjectIndexer::SORTABLE_DATE} desc, creator_label_si asc",
+      label: "year descending"
+    )
+    config.add_sort_field(
+      "creator_label_si asc, #{ObjectIndexer::SORTABLE_DATE} asc",
+      label: "creator ascending"
+    )
+    config.add_sort_field(
+      "creator_label_si desc, #{ObjectIndexer::SORTABLE_DATE} asc",
+      label: "creator descending"
+    )
 
     # If there are more than this many search results, no spelling ("did you
     # mean") suggestion is offered.
     config.spell_max = 5
   end
 
-  # disable the bookmark control from displaying in gallery view
-  # Hyrax doesn't show any of the default controls on the list view, so
-  # this method is not called in that context.
-  def render_bookmarks_control?
-    false
+  def show_embargos_link?(_config, options)
+    return false unless (doc = options.fetch(:document))
+    doc.curation_concern? && can?(:update_rights, doc)
+  end
+
+  # Should we show the "edit metadata" link on the show page?
+  # Only shows up for non-etd things
+  def editor?(_, stuff)
+    document = stuff.fetch(:document)
+    can?(:edit, document) && !document.etd?
+  end
+
+  # Overriding to permit parameters; see https://groups.google.com/d/msg/blacklight-development/Gr12dc1S4no/TQq3DQXABQAJ
+  def search_state
+    @search_state ||= search_state_class.new(
+      params.permit!, blacklight_config, self
+    )
   end
 end

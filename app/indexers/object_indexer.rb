@@ -187,7 +187,7 @@ class ObjectIndexer < Hyrax::WorkIndexer
       object.file_sets.map do |file_set|
         file = file_set.files.first
         next unless file
-        Riiif::Engine.routes.url_helpers.image_url(
+        ::Riiif::Engine.routes.url_helpers.image_url(
           file.id,
           size: size,
           region: region,
@@ -200,7 +200,7 @@ class ObjectIndexer < Hyrax::WorkIndexer
       object.file_sets.map do |file_set|
         file = file_set.files.first
         next unless file
-        Riiif::Engine.routes.url_helpers.info_path(file.id)
+        ::Riiif::Engine.routes.url_helpers.info_path(file.id)
       end
     end
 end

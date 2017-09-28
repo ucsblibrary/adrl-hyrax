@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   mount Hyrax::Engine, at: "/"
   mount Hydra::RoleManagement::Engine => "/"
   mount Qa::Engine => "/authorities"
+  mount ::Riiif::Engine => "/image-service", as: "riiif"
 
   root "hyrax/homepage#index"
   curation_concerns_basic_routes

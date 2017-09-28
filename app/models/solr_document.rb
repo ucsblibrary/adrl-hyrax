@@ -31,7 +31,9 @@ class SolrDocument
   module ConnectionWithModel
     def connection
       # TODO: clean the fedora added triples out.
-      @connection ||= CleanConnection.new(ActiveFedora.fedora.connection)
+      @connection ||= ActiveFedora::CleanConnection.new(
+        ActiveFedora.fedora.connection
+      )
     end
   end
 
