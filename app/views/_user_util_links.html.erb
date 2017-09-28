@@ -1,0 +1,25 @@
+<nav class="menu navbar-nav navbar-right">
+<ul id="user_utility_links">
+  <li><%= link_to 'About', main_app.about_path %></li>
+  <li><%= link_to 'FAQ', main_app.using_path %></li>
+  <li><%= link_to 'Usage Guidelines', main_app.collection_usage_guidelines_path %></li>
+
+  <% if logged_in? %>
+    <li><%= link_to main_app.bookmarks_path, id: "bookmarks_nav" do %>
+      <%= t('blacklight.header_links.bookmarks') %>
+      (<span data-role='bookmark-counter'><%= current_user.bookmarks.count %></span>)
+    <% end %></li>
+  <% end %>
+
+  <li class="login-link">
+    <% if logged_in? %>
+      <%= link_to t('blacklight.header_links.logout'), main_app.logout_path %>
+      <% unless current_user.to_s.blank? %>
+        <%= "(#{current_user})" %>
+      <% end %>
+    <% else %>
+      <%= link_to 'Login', main_app.new_user_session_path %>
+    <% end %>
+  </li>
+</ul>
+</nav>

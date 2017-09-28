@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  include SessionsHelper
+
+  def user_signed_in?
+    current_user.present?
+  end
+
   # @param [String] string
   # @return [String]
   def linkify(string)

@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   include Hydra::Controller::ControllerBehavior
   include Hyrax::Controller
   include Hyrax::ThemedLayoutController
+  include SessionsHelper
 
   with_themed_layout "1_column"
 
@@ -37,6 +38,7 @@ class ApplicationController < ActionController::Base
   end
   helper_method :on_campus?
 
+  # TODO: put these in a YAML config file
   def on_campus_network_prefixes
     %w[
       128.111

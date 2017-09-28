@@ -68,6 +68,9 @@ module Importer::Factory
         render_thumbnails(object)
       end
 
+      logger.debug object.inspect
+      logger.debug attrs.inspect
+
       run_callbacks :save do
         run_callbacks :create do
           object.save!

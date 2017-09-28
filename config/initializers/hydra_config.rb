@@ -17,10 +17,4 @@ Hydra.configure do |config|
   #
   # config.permissions.embargo.release_date  = ActiveFedora::SolrQueryBuilder.solr_name("embargo_release_date", :stored_sortable, type: :date)
   # config.permissions.lease.expiration_date = ActiveFedora::SolrQueryBuilder.solr_name("lease_expiration_date", :stored_sortable, type: :date)
-  #
-  #
-  # Specify the user model
-  # config.user_model = 'User'
-
-  config.user_key_field = Devise.authentication_keys.first
 end

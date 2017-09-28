@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  devise_for :users
-
   mount Blacklight::Engine => "/"
   mount Hyrax::Engine, at: "/"
   mount Hydra::RoleManagement::Engine => "/"
@@ -10,7 +8,17 @@ Rails.application.routes.draw do
   mount ::Riiif::Engine => "/image-service", as: "riiif"
 
   root "hyrax/homepage#index"
+  get "hyrax/homepage/about", as: "about"
+  get "hyrax/homepage/collection-usage-guidelines",
+      as: "collection-usage-guidelines"
+  get "hyrax/homepage/using", as: "using"
+
   curation_concerns_basic_routes
+
+  # new_user_session_path is hardcoded everywhere in Blacklight
+  get "sign_in", to: "sessions#new", as: :new_user_session
+  post "login", to: "sessions#create"
+  get "logout", to: "sessions#destroy"
 
   concern :searchable, Blacklight::Routes::Searchable.new
   concern :exportable, Blacklight::Routes::Exportable.new
