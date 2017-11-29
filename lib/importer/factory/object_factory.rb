@@ -161,7 +161,7 @@ module Importer::Factory
     def remove_existing_file_sets(object)
       return if object.file_sets.blank?
       object.file_sets.each do |f|
-        CurationConcerns::Actors::FileSetActor.new(f, nil).destroy
+        Hyrax::Actors::FileSetActor.new(f, nil).destroy
       end
       object.save
       object.reload.file_sets

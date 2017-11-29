@@ -2,7 +2,7 @@
 
 Rails.application.routes.draw do
   mount Blacklight::Engine => "/"
-  mount Hyrax::Engine, at: "/"
+  mount Hyrax::Engine => "/"
   mount Hydra::RoleManagement::Engine => "/"
   mount Qa::Engine => "/authorities"
   mount ::Riiif::Engine => "/image-service", as: "riiif"
@@ -22,6 +22,7 @@ Rails.application.routes.draw do
 
   concern :searchable, Blacklight::Routes::Searchable.new
   concern :exportable, Blacklight::Routes::Exportable.new
+  concern :range_searchable, BlacklightRangeLimit::Routes::RangeSearchable.new
 
   resources :welcome, only: "index"
 
@@ -31,6 +32,7 @@ Rails.application.routes.draw do
            path: "/catalog",
            controller: "catalog" do
     concerns :searchable
+    concerns :range_searchable
   end
 
   resources :solr_documents,

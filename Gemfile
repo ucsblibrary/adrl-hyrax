@@ -9,7 +9,7 @@ gem "blacklight_range_limit"
 gem "coffee-rails"
 gem "ezid-client"
 gem "hydra-role-management"
-gem "hyrax", path: "/Users/alex/clones/hyrax"
+gem "hyrax", path: "/home/cat/clones/hyrax"
 gem "jbuilder"
 gem "jquery-rails"
 gem "linked_vocabs",
@@ -17,11 +17,10 @@ gem "linked_vocabs",
     ref: "67d80da0de07bf428c7f1a70ac2647b96edc274b"
 gem "marc"
 gem "metadata_ci",
-    git: "https://github.com/ucsblibrary/metadata-ci.git",
-    ref: "be592cdfc3d5a464d60f2cf3496409026e505d38"
+    git: "https://github.com/ucsblibrary/metadata-ci.git"
 gem "net-ldap"
 gem "puma"
-gem "rdf-vocab", path: "/Users/alex/clones/rdf-vocab"
+gem "rdf-vocab"
 gem "redis"
 gem "riiif"
 gem "rsolr"
