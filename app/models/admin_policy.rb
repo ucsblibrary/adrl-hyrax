@@ -104,7 +104,12 @@ module AdminPolicy
   end
 
   def self.ensure_admin_policy_exists
-    POLICY_DEFINITIONS.values.each do |defn|
+    begin
+      AdminSet.find_or_create_default_admin_set_id
+    rescue ActiveRecord::RecordNotUnique
+    end
+
+    POLICY_DEFINITIONS.each_value do |defn|
       next if Hydra::AdminPolicy.exists?(defn[:id])
 
       policy = Hydra::AdminPolicy.create(

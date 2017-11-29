@@ -33,6 +33,11 @@ class Ability
   end
   alias can_create_any_work? admin?
 
+  # Used by Hyrax::AdminSetCreateService
+  def self.admin_group_name
+    AdminPolicy::META_ADMIN
+  end
+
   def metadata_admin_permissions
     return unless user_groups.include?(AdminPolicy::META_ADMIN)
 

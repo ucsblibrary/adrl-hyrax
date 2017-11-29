@@ -225,6 +225,12 @@ module Importer::Factory
       end
 
       def transform_attributes
+        admin_set = if klass == Collection
+                      {}
+                    else
+                      { admin_set_id: "admin_set/default" }
+                    end
+
         contributors = LocalAuthority.find_or_create_contributors(
           klass.contributor_fields,
           attributes
@@ -249,7 +255,8 @@ module Importer::Factory
           restrictions: [join_paragraphs(attributes[:restrictions])],
         }
 
-        attributes.merge(contributors)
+        attributes.merge(admin_set)
+          .merge(contributors)
           .merge(description)
           .merge(locations)
           .merge(notes)
