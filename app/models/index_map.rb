@@ -17,14 +17,6 @@ class IndexMap < ActiveFedora::Base
            predicate: ::RDF::Vocab::DC.dateCopyrighted,
            class_name: TimeSpan
 
-  accepts_nested_attributes_for :issued,
-                                reject_if: :time_span_blank,
-                                allow_destroy: true
-
-  accepts_nested_attributes_for :date_copyrighted,
-                                reject_if: :time_span_blank,
-                                allow_destroy: true
-
   validates :title, presence: { message: "Your work must have a title." }
   validates_vocabulary_of :rights_holder
   validates_vocabulary_of :form_of_work
@@ -39,4 +31,10 @@ class IndexMap < ActiveFedora::Base
   # This must be included at the end, because it finalizes the metadata
   # schema (by adding accepts_nested_attributes)
   include NestedAttributes
+  accepts_nested_attributes_for :issued,
+                                reject_if: :time_span_blank,
+                                allow_destroy: true
+  accepts_nested_attributes_for :date_copyrighted,
+                                reject_if: :time_span_blank,
+                                allow_destroy: true
 end

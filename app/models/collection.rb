@@ -13,25 +13,21 @@ class Collection < ActiveFedora::Base
            predicate: ::RDF::Vocab::DC.dateCopyrighted,
            class_name: TimeSpan
 
+  # This must be included at the end, because it finalizes the metadata
+  # schema (by adding accepts_nested_attributes)
+  include NestedAttributes
   accepts_nested_attributes_for(
     :creator,
     reject_if: lambda { |attributes| attributes[:id].blank? }
   )
-
   accepts_nested_attributes_for(
     :collector,
     reject_if: lambda { |attributes| attributes[:id].blank? }
   )
-
   accepts_nested_attributes_for :issued,
                                 reject_if: :time_span_blank,
                                 allow_destroy: true
-
   accepts_nested_attributes_for :date_copyrighted,
                                 reject_if: :time_span_blank,
                                 allow_destroy: true
-
-  # This must be included at the end, because it finalizes the metadata
-  # schema (by adding accepts_nested_attributes)
-  include NestedAttributes
 end

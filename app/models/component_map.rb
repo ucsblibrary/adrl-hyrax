@@ -21,15 +21,13 @@ class ComponentMap < ActiveFedora::Base
   validates_vocabulary_of :rights_holder
   validates_vocabulary_of :form_of_work
 
-  accepts_nested_attributes_for :issued,
-                                reject_if: :time_span_blank,
-                                allow_destroy: true
-
-  accepts_nested_attributes_for :date_copyrighted,
-                                reject_if: :time_span_blank,
-                                allow_destroy: true
-
   # This must be included at the end, because it finalizes the metadata
   # schema (by adding accepts_nested_attributes)
   include NestedAttributes
+  accepts_nested_attributes_for :issued,
+                                reject_if: :time_span_blank,
+                                allow_destroy: true
+  accepts_nested_attributes_for :date_copyrighted,
+                                reject_if: :time_span_blank,
+                                allow_destroy: true
 end

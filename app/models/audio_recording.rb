@@ -13,11 +13,10 @@ class AudioRecording < ActiveFedora::Base
 
   property :issued, predicate: ::RDF::Vocab::DC.issued, class_name: TimeSpan
 
-  accepts_nested_attributes_for :issued,
-                                reject_if: :time_span_blank,
-                                allow_destroy: true
-
   # This must be included at the end, because it finalizes the metadata
   # schema (by adding accepts_nested_attributes)
   include NestedAttributes
+  accepts_nested_attributes_for :issued,
+                                reject_if: :time_span_blank,
+                                allow_destroy: true
 end
