@@ -13,6 +13,8 @@
 /tmp/*
 !/log/.keep
 !/tmp/.keep
+!/tmp/pids
+/tmp/pids/*.pid
 *.log
 
 /node_modules
