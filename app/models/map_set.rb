@@ -47,4 +47,9 @@ class MapSet < ActiveFedora::Base
   accepts_nested_attributes_for :date_copyrighted,
                                 reject_if: :time_span_blank,
                                 allow_destroy: true
+  # Override Hyrax
+  # https://github.com/samvera/hyrax/blob/master/app/models/concerns/hyrax/work_behavior.rb#L39-L45
+  def self._to_partial_path
+    "catalog/document"
+  end
 end

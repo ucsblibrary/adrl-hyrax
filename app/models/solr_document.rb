@@ -43,7 +43,7 @@ class SolrDocument
   def curation_concern?
     return false if fetch("has_model_ssim", []).empty?
 
-    CurationConcerns.config.registered_curation_concern_types.any? do |type|
+    Hyrax.config.registered_curation_concern_types.any? do |type|
       type == fetch("has_model_ssim", []).first
     end
   end
