@@ -9,7 +9,9 @@ gem "blacklight_range_limit"
 gem "coffee-rails"
 gem "ezid-client"
 gem "hydra-role-management"
-gem "hyrax", path: "/home/cat/clones/hyrax"
+gem "hyrax",
+    git: "https://github.com/dunn/hyrax.git",
+    branch: "deep-indexer"
 gem "jbuilder"
 gem "jquery-rails"
 gem "linked_vocabs",
@@ -23,7 +25,8 @@ gem "puma"
 gem "rdf-vocab"
 gem "redis"
 gem "riiif"
-gem "rsolr"
+# Allowing 2.1.0 causes `uninitialized constant RSolr` errors
+gem "rsolr", "~> 2.0.1"
 gem "sass-rails"
 gem "settingslogic"
 gem "traject"
